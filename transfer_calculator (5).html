@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حاسبة معادلة التحويل — جامعة الجوف</title>
+<style>
+  :root{
+    --ink:#1b2a30;
+    --muted:#65798380;
+    --muted-solid:#647983;
+    --paper:#f6f8f8;
+    --card:#ffffff;
+    --line:#e2e8e9;
+    --primary:#17414d;
+    --primary-2:#2e6b7a;
+    --primary-tint:#eaf2f2;
+    --gold:#a9813f;
+    --gold-tint:#f7f0e2;
+    --gray:#8b98a0;
+    --gray-tint:#eef1f2;
+    --good:#1f7a4d;
+    --good-bg:#e9f6ef;
+    --good-line:#bfe4d0;
+    --bad:#b3374a;
+    --bad-bg:#fbeced;
+    --bad-line:#f0c4cb;
+    --warn:#8a6116;
+    --warn-bg:#fbf3e2;
+    --warn-line:#eeddb0;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(23,65,77,.04), 0 8px 24px -12px rgba(23,65,77,.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 480px at 85% -10%, #e9f2f1 0%, transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"SF Arabic","Segoe UI","Tahoma","Dubai","Noto Kufi Arabic",Arial,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:36px 22px 60px;}
+
+  /* header */
+  .masthead{display:flex;align-items:center;gap:16px;margin-bottom:6px;}
+  .badge{
+    width:52px;height:52px;border-radius:14px;flex:none;
+    background:linear-gradient(160deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 20px -8px rgba(23,65,77,.55);
+  }
+  .badge svg{width:26px;height:26px;}
+  .masthead h1{font-size:22px;margin:0;letter-spacing:.1px;font-weight:800;color:var(--primary);}
+  .masthead p{margin:2px 0 0;color:var(--muted-solid);font-size:13.5px;}
+  .divider{height:1px;background:linear-gradient(90deg,var(--line),transparent 85%);margin:22px 0 26px;}
+
+  /* layout */
+  .grid{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:22px;align-items:start;}
+  @media (max-width:920px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:20px 20px 22px;
+  }
+  .card + .card{margin-top:18px;}
+  .card-head{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .card-head .icon{width:18px;height:18px;color:var(--primary-2);flex:none;}
+  .card-head h2{font-size:14px;margin:0;font-weight:800;color:#2b3b40;}
+  .card-sub{font-size:12px;color:var(--muted-solid);margin:-8px 0 14px;}
+
+  /* form elements */
+  .field{display:block;margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:#3a4a4f;margin-bottom:6px;}
+  .field .hint{display:block;font-size:11px;color:#9aa6ab;margin-top:5px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  input[type=number], select{
+    width:100%;
+    border:1.4px solid #d7dfe0;
+    background:#fff;
+    border-radius:9px;
+    padding:9px 11px;
+    font-size:14px;
+    color:var(--ink);
+    text-align:right;
+    font-family:inherit;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input[type=number]:focus, select:focus{
+    outline:none;
+    border-color:var(--primary-2);
+    box-shadow:0 0 0 3px rgba(46,107,122,.14);
+  }
+  input::placeholder{color:#b6c0c2;}
+
+  .seg{display:inline-flex;background:var(--gray-tint);border-radius:11px;padding:4px;gap:4px;width:100%;}
+  .seg button{
+    flex:1;border:none;background:transparent;padding:10px 10px;border-radius:8px;
+    font-family:inherit;font-size:13.5px;font-weight:700;color:#5b6b70;cursor:pointer;
+    transition:.15s;
+  }
+  .seg button.active{background:var(--primary);color:#fff;box-shadow:0 4px 10px -4px rgba(23,65,77,.5);}
+
+  .check-row{display:flex;align-items:center;gap:8px;font-size:13px;color:#43555b;margin-top:12px;cursor:pointer;user-select:none;}
+  .check-row input{width:16px;height:16px;accent-color:var(--primary-2);}
+
+  .tag{
+    display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;
+    padding:3px 9px;border-radius:99px;background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-line);
+  }
+  .note{font-size:12px;background:var(--warn-bg);color:#7a5a12;border:1px solid var(--warn-line);border-radius:10px;padding:9px 12px;margin-top:10px;}
+  .info-line{font-size:12px;color:#5b6b70;display:flex;gap:6px;align-items:flex-start;margin-top:10px;}
+  .info-line svg{width:14px;height:14px;flex:none;margin-top:2px;color:#8a99a0;}
+
+  /* results */
+  .verdict{
+    border-radius:var(--radius);padding:16px 18px;display:flex;gap:12px;align-items:center;
+    border:1px solid var(--good-line); background:var(--good-bg);
+    box-shadow:var(--shadow);
+  }
+  .verdict.bad{background:var(--bad-bg);border-color:var(--bad-line);}
+  .verdict svg{width:28px;height:28px;flex:none;}
+  .verdict.good svg{color:var(--good);}
+  .verdict.bad svg{color:var(--bad);}
+  .verdict strong{display:block;font-size:14.5px;color:#1f2f34;}
+  .verdict.bad strong{color:#5c1c28;}
+  .verdict span{font-size:12px;color:#5b6b70;}
+
+  .results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:16px;}
+  .result-card{
+    border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;background:#fff;
+    display:flex;flex-direction:column;gap:6px;position:relative;
+  }
+  .result-card.proposed{
+    border-color:var(--primary);
+    background:linear-gradient(180deg,var(--primary-tint),#fff 65%);
+  }
+  .result-title-row{display:flex;justify-content:space-between;align-items:flex-start;}
+  .result-card h3{font-size:13.5px;margin:0;color:#2b3b40;font-weight:800;}
+  .pill-proposed{font-size:9.5px;font-weight:900;letter-spacing:.4px;color:var(--primary);background:#d9e8e7;padding:3px 8px;border-radius:99px;}
+  .result-card .sub{font-size:11px;color:#93a2a7;margin-top:-3px;}
+  .num{display:flex;align-items:baseline;gap:3px;margin-top:2px;}
+  .num .v{font-size:34px;font-weight:900;line-height:1;}
+  .num .u{font-size:15px;font-weight:800;color:#9aa6ab;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+  .chip{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:99px;}
+  .chip.ok{color:var(--good);background:var(--good-bg);border:1px solid var(--good-line);}
+  .chip.no{color:var(--bad);background:var(--bad-bg);border:1px solid var(--bad-line);}
+  .chip svg{width:11px;height:11px;}
+
+  /* chart */
+  .chart-wrap{margin-top:18px;}
+  .chart{display:flex;align-items:flex-end;gap:26px;height:200px;padding:10px 14px 0;position:relative;}
+  .chart .threshold-line{
+    position:absolute;left:14px;right:14px;height:0;border-top:2px dashed #c94b5e;
+  }
+  .threshold-label{position:absolute;font-size:10.5px;font-weight:800;color:#c94b5e;background:#fff;padding:0 4px;}
+  .bar-col{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;height:100%;justify-content:flex-end;}
+  .bar{width:100%;max-width:64px;border-radius:8px 8px 3px 3px;transition:height .25s ease;position:relative;}
+  .bar .val{position:absolute;top:-22px;left:0;right:0;text-align:center;font-size:12.5px;font-weight:900;color:#2b3b40;}
+  .bar-label{font-size:11px;text-align:center;color:#5b6b70;font-weight:700;line-height:1.3;height:29px;display:flex;align-items:center;justify-content:center;}
+
+  .detail-list{font-size:12.5px;color:#43555b;display:flex;flex-direction:column;gap:5px;}
+  .detail-list b{color:#2b3b40;}
+
+  .pref-row{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;background:#fafcfc;position:relative;}
+  .pref-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .pref-num{font-size:12.5px;font-weight:900;color:var(--primary);background:var(--primary-tint);padding:3px 10px;border-radius:99px;}
+  .pref-remove{border:none;background:none;color:var(--bad);font-size:11.5px;font-weight:700;cursor:pointer;padding:2px 4px;}
+  .add-pref-btn{width:100%;border:1.5px dashed #b9c6c8;background:#fff;color:var(--primary-2);font-weight:800;font-size:13px;padding:10px;border-radius:10px;cursor:pointer;font-family:inherit;transition:.15s;}
+  .add-pref-btn:hover{background:var(--primary-tint);}
+  .add-pref-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  .pref-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .pref-table th{background:var(--primary);color:#fff;padding:8px 9px;text-align:right;font-weight:800;}
+  .pref-table td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .pref-table tr.accepted td{background:var(--good-bg);}
+  .pref-table tr.rejected td{color:#93a2a7;}
+  .pref-table tr.skipped td{color:#c3ccce;}
+
+  .formula-section{margin-bottom:16px;}
+  .formula-section:last-child{margin-bottom:0;}
+  .formula-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:#2b3b40;margin-bottom:8px;}
+  .formula-title .dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .formula-steps{display:flex;flex-direction:column;gap:6px;background:#f8fafa;border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+  .fstep{display:flex;flex-wrap:wrap;gap:6px;font-size:12.5px;color:#43555b;align-items:baseline;}
+  .fstep .flabel{color:#8b98a0;min-width:150px;flex:none;font-weight:600;}
+  .fstep .fexpr{font-family:"SF Mono",Consolas,monospace;direction:ltr;text-align:right;color:#2b3b40;font-weight:700;unicode-bidi:plaintext;}
+  .fstep.fstep-sum{background:#eef6f5;border-radius:8px;padding:6px 10px;margin:0 -10px;border-right:3px solid #17414d;}
+  .fstep.fstep-sum .flabel{color:#17414d;}
+  .fstep.fstep-sum .fexpr{color:#17414d;}
+  .sum-plus{text-align:center;font-size:14px;font-weight:900;color:#8b98a0;margin:-2px 0;}
+  .fresult{margin-top:8px;padding-top:8px;border-top:1px dashed #d7dfe0;display:flex;justify-content:space-between;align-items:center;}
+  .fresult b{font-size:15px;}
+
+  footer{text-align:center;color:#9aa6ab;font-size:11.5px;margin-top:34px;}
+
+  @media print{
+    body{background:#fff;}
+    .card{box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M9 7h6M9 11h6M9 15h3"></path></svg>
+    </div>
+    <div>
+      <h1>حاسبة معادلة التحويل — جامعة الجوف</h1>
+      <p>مقارنة المعادلة المقترحة بالمعادلة المعمول بها حالياً، للتحويل الداخلي والخارجي</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="grid">
+    <!-- FORM -->
+    <div>
+      <div class="card" style="background:linear-gradient(180deg,var(--primary-tint),#fff 70%);border-color:#cfe1e0;">
+        <div class="card-head">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15z"></path></svg>
+          <h2>المعادلة نظرياً</h2>
+        </div>
+        <p style="font-size:12.5px;color:#43555b;margin:0 0 10px;">الشكل العام للمعادلة المقترحة قبل إدخال بيانات أي طالب — الأوزان الثلاثة قابلة للتعديل، وأي تغيير ينعكس فوراً على كل أقسام البرنامج (الداخلي والخارجي معاً):</p>
+        <div class="row2" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="field">
+            <label>وزن المعدل (٪)</label>
+            <input type="number" id="weightGpa" value="50">
+          </div>
+          <div class="field">
+            <label>وزن الموزونة (٪)</label>
+            <input type="number" id="weightWeighted" value="40">
+          </div>
+          <div class="field">
+            <label>وزن الساعات (٪)</label>
+            <input type="number" id="weightHours" value="10">
+          </div>
+        </div>
+        <span class="hint" id="weightSumWarning" style="display:none;color:#c94b5e;">تنبيه: مجموع الأوزان الثلاثة حالياً لا يساوي ١٠٠٪.</span>
+        <div class="formula-steps" style="background:#fff;margin-top:10px;">
+          <div style="font-family:'SF Mono',Consolas,monospace;direction:ltr;text-align:center;font-size:13px;color:#17414d;font-weight:700;line-height:2;unicode-bidi:plaintext;">
+            النسبة المركبة = (<span id="wGpaDisp">٥٠</span>٪ × المعدل التراكمي) <br>
+            + (<span id="wWeightedDisp">٤٠</span>٪ × النسبة الموزونة/المكافئة) <br>
+            + (<span id="wHoursDisp">١٠</span>٪ × نسبة الساعات المجتازة من الخطة)
+          </div>
+        </div>
+        <p style="font-size:11px;color:#93a2a7;margin:8px 0 0;">لا يجوز التحويل بعد تجاوز نصف الساعات أو نصف مستويات الخطة الدراسية. الحد الأدنى لدخول المنافسة يختلف حسب تصنيف الكلية الهدف (تفصيل ذلك أسفل يسار الصفحة)، ويُضاف هامش الزيادة تلقائياً للتحويل الخارجي. بعدها يكون القبول حسب المقاعد الشاغرة.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4M17 8l4 4-4 4"></path></svg>
+          <h2>نوع التحويل</h2>
+        </div>
+        <div class="seg" id="segTransferType">
+          <button data-val="internal" class="active">داخلي</button>
+          <button data-val="external">خارجي</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"></path><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"></path></svg>
+          <h2>بيانات الطالب</h2>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>المعدل التراكمي</label>
+            <input type="number" id="gpa" step="0.01" value="4.20">
+          </div>
+          <div class="field">
+            <label>مقياس المعدل</label>
+            <select id="gpaScale">
+              <option value="5">من 5</option>
+              <option value="4">من 4</option>
+              <option value="100">من 100</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label id="weightedLabel">النسبة الموزونة الأصلية (٪)</label>
+          <input type="number" id="weighted" value="70">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>عدد الساعات المجتازة</label>
+            <input type="number" id="hoursPassed" value="80">
+          </div>
+          <div class="field">
+            <label>إجمالي ساعات الخطة</label>
+            <input type="number" id="hoursTotal" value="160">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>عدد المستويات المجتازة</label>
+            <input type="number" id="levelCurrent" value="6">
+          </div>
+          <div class="field">
+            <label>إجمالي مستويات الخطة</label>
+            <input type="number" id="levelTotal" value="12">
+          </div>
+        </div>
+        <p class="info-line">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+          <span id="durationInfo">نسبة الإنجاز الزمني الحالية: —</span>
+        </p>
+        <p class="card-sub" style="margin-top:14px;" id="minThresholdLabel">الحد الأدنى لدخول المنافسة حسب تصنيف الكلية الهدف (٪ داخلي)</p>
+        <div class="row2" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="field">
+            <label>صحية</label>
+            <input type="number" id="minHealth" value="70">
+            <span class="hint" id="minHealthEff" style="display:none;"></span>
+          </div>
+          <div class="field">
+            <label>علمية</label>
+            <input type="number" id="minScientific" value="65">
+            <span class="hint" id="minScientificEff" style="display:none;"></span>
+          </div>
+          <div class="field">
+            <label>نظرية</label>
+            <input type="number" id="minTheoretical" value="60">
+            <span class="hint" id="minTheoreticalEff" style="display:none;"></span>
+          </div>
+        </div>
+        <div class="field" id="marginFieldWrap" style="margin-top:10px;display:none;">
+          <label>هامش الزيادة للتحويل الخارجي (٪)</label>
+          <input type="number" id="externalMargin" value="5">
+          <span class="hint">يُضاف تلقائياً فوق حد كل تصنيف كلية عند التحويل الخارجي؛ الافتراضي المقترح ٥٪، وقابل للتعديل هنا للتجربة.</span>
+        </div>
+        <span class="hint" id="marginFieldHint">الحد يُحدَّد حسب تصنيف الكلية الهدف لكل رغبة على حدة؛ يُضاف ٥٪ تلقائياً عند التحويل الخارجي. قابلة للتعديل هنا للتجربة.</span>
+      </div>
+
+      <div class="card" id="externalNote" style="display:none;">
+        <div class="card-head">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"></path></svg>
+          <h2>التحويل الخارجي — بيانات الطالب فقط</h2>
+        </div>
+        <p style="font-size:12.5px;color:#43555b;margin:0;" id="externalNoteText">يشمل أي طالب قد درس في جامعة أو كلية محلية (سعودية، حكومية أو أهلية)، أو جامعة أو كلية أو مؤسسة تعليمية أجنبية مرخّصة من جهة الاختصاص في بلد الدراسة. لا تعتمد المعادلة على أي مقارنة لمعايير القبول بين الجامعة المصدر وجامعة الجوف، ولا تشترط توفر أي بيانات عن تلك الجامعة. القياس يقوم حصراً على بيانات الطالب نفسه (معدله، نسبته الموزونة/المكافئة، وساعاته)، بنفس أوزان التحويل الداخلي تماماً، مع تشديد الحد الأدنى لدخول المنافسة بهامش ثابت (+٥ نقاط) فوق حد كل تصنيف كلية، موضَّح أدناه.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path></svg>
+          <h2>الرغبات المرتبة (١-٤)</h2>
+        </div>
+        <p class="card-sub">تُعالَج الرغبات بالترتيب من الأولى؛ يُقبل الطالب في أعلى رغبة يستوفي شروطها الحاكمة (المدة، الحد الأدنى) ويوجد فيها مقعد شاغر، ولا تُفحص الرغبات الأدنى بعدها.</p>
+        <div id="preferencesContainer"></div>
+        <button type="button" id="addPrefBtn" class="add-pref-btn">+ إضافة رغبة</button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div>
+      <div class="verdict good" id="verdictBox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"></path><path d="M22 4L12 14.01l-3-3"></path></svg>
+        <div>
+          <strong id="verdictTitle">مؤهَّل لدخول المنافسة وفق المعادلة المقترحة</strong>
+          <span id="verdictSub">القرار النهائي يعتمد على تحقق كل الشروط الحاكمة معاً (المدة، الحد الأدنى للمعدل، الحد الأدنى للنسبة المركبة، المقعد الشاغر)</span>
+        </div>
+      </div>
+
+      <div class="results-grid" id="resultsGrid"></div>
+
+      <div class="card chart-wrap">
+        <div class="card-head"><h2>مقارنة بصرية للنسب المركبة</h2></div>
+        <div class="chart" id="chart"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+          <h2>آلية المطابقة التتابعية عبر الرغبات</h2>
+        </div>
+        <div id="prefResultsTable"></div>
+      </div>
+
+      <div class="card" id="compareCard" style="display:none;">
+        <div class="card-head">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-3M18 2l4 4-10 10H8v-4L18 2z"></path></svg>
+          <h2 id="compareCardTitle">مثال: الفرق بين التحويل الداخلي والخارجي — وأثر هامش الـ+٥</h2>
+        </div>
+        <p class="card-sub" style="margin-bottom:12px;" id="compareCardSub">يقارن هذا المثال نفس بيانات الطالب الحالية على الحد الأدنى الموحّد لدخول المنافسة، مرة كأنه تحويل داخلي ومرة كأنه تحويل خارجي، ليتضح أثر هامش الـ+٥ وحده.</p>
+        <div id="internalExternalCompare"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>حسبة المعادلة كاملة بالتفصيل</h2></div>
+        <div id="formulaBlock"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>أداة استرشادية مبنية على مقترح مصفوفة التحويل الداخلي والخارجي — جامعة الجوف</footer>
+</div>
+
+<script>
+const TIER_LABELS = { health: "صحية", scientific: "علمية", theoretical: "نظرية" };
+
+let state = {
+  transferType: "internal",
+};
+
+const $ = (id) => document.getElementById(id);
+
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const r1 = (v) => Math.round(v * 10) / 10;
+
+function iconCheck(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>'; }
+function iconX(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>'; }
+
+function setupSeg(id, onChange){
+  const el = $(id);
+  el.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      el.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      onChange(btn.dataset.val);
+    });
+  });
+}
+
+setupSeg('segTransferType', (val)=>{
+  state.transferType = val;
+  const isExt = val === 'external';
+  $('externalNote').style.display = isExt ? 'block' : 'none';
+  $('marginFieldWrap').style.display = isExt ? 'block' : 'none';
+  $('weightedLabel').textContent = isExt ? 'النسبة الموزونة/المكافئة الأصلية (٪)' : 'النسبة الموزونة الأصلية (٪)';
+  $('compareCard').style.display = isExt ? 'block' : 'none';
+  renderPreferences();
+  compute();
+});
+
+// ----- preferences (رغبات) state -----
+let preferences = [
+  { name: 'تمريض', tier: 'health', gpaMin: '4.50', seat: true },
+  { name: 'هندسة برمجيات', tier: 'scientific', gpaMin: '3.75', seat: true },
+  { name: 'قانون', tier: 'theoretical', gpaMin: '3.00', seat: true },
+];
+
+function renderPreferences(){
+  const isExt = state.transferType === 'external';
+  const threshold = isExt ? 70 : 65;
+  const container = $('preferencesContainer');
+  container.innerHTML = preferences.map((p, i) => {
+    return `
+    <div class="pref-row" data-idx="${i}">
+      <div class="pref-row-head">
+        <span class="pref-num">الرغبة ${i+1}</span>
+        ${preferences.length > 1 ? `<button type="button" class="pref-remove" data-idx="${i}">حذف</button>` : ''}
+      </div>
+      <div class="field">
+        <label>التخصص الهدف (اختياري)</label>
+        <input type="text" class="pref-name" data-idx="${i}" value="${p.name}" placeholder="مثال: الهندسة">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>تصنيف الكلية</label>
+          <select class="pref-tier" data-idx="${i}">
+            <option value="health" ${p.tier==='health'?'selected':''}>صحية</option>
+            <option value="scientific" ${p.tier==='scientific'?'selected':''}>علمية</option>
+            <option value="theoretical" ${p.tier==='theoretical'?'selected':''}>نظرية</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>مقعد شاغر؟</label>
+          <select class="pref-seat" data-idx="${i}">
+            <option value="1" ${p.seat?'selected':''}>نعم</option>
+            <option value="0" ${!p.seat?'selected':''}>لا</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>الحد الأدنى للمعدل الذي يحدده القسم (من ٥)</label>
+        <input type="number" step="0.01" class="pref-gpamin" data-idx="${i}" value="${p.gpaMin}" placeholder="—">
+        <span class="hint">الحد الأدنى لدخول المنافسة على النسبة المركبة: ${threshold}٪ (موحّد لكل الرغبات ${isExt ? 'الخارجية' : 'الداخلية'})</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  container.querySelectorAll('.pref-name').forEach(el => el.addEventListener('input', e => {
+    preferences[+e.target.dataset.idx].name = e.target.value; compute();
+  }));
+  container.querySelectorAll('.pref-tier').forEach(el => el.addEventListener('change', e => {
+    const i = +e.target.dataset.idx;
+    preferences[i].tier = e.target.value;
+    renderPreferences(); compute();
+  }));
+  container.querySelectorAll('.pref-seat').forEach(el => el.addEventListener('change', e => {
+    preferences[+e.target.dataset.idx].seat = e.target.value === '1'; compute();
+  }));
+  container.querySelectorAll('.pref-gpamin').forEach(el => el.addEventListener('input', e => {
+    preferences[+e.target.dataset.idx].gpaMin = e.target.value; compute();
+  }));
+  container.querySelectorAll('.pref-remove').forEach(el => el.addEventListener('click', e => {
+    const i = +e.target.dataset.idx;
+    preferences.splice(i, 1);
+    renderPreferences(); compute();
+  }));
+
+  $('addPrefBtn').disabled = preferences.length >= 4;
+}
+
+$('addPrefBtn').addEventListener('click', () => {
+  if(preferences.length >= 4) return;
+  preferences.push({ name: '', tier: 'theoretical', gpaMin: '', seat: true });
+  renderPreferences();
+  compute();
+});
+
+renderPreferences();
+
+// wire all remaining inputs to recompute live
+[
+  'gpa','gpaScale','weighted','hoursPassed','hoursTotal','levelCurrent','levelTotal','minHealth','minScientific','minTheoretical','externalMargin','weightGpa','weightWeighted','weightHours',
+].forEach(id=>{
+  const el = $(id);
+  el.addEventListener('input', compute);
+  el.addEventListener('change', compute);
+});
+
+function compute(){
+  const isExternal = state.transferType === 'external';
+
+  const gpa = parseFloat($('gpa').value) || 0;
+  const gpaScale = parseFloat($('gpaScale').value);
+  const gpaOn5 = gpaScale === 5 ? gpa : gpaScale === 4 ? gpa * (5/4) : (gpa/100) * 5;
+  const gpa100 = (gpaOn5/5) * 100;
+
+  const hoursPassed = parseFloat($('hoursPassed').value) || 0;
+  const hoursTotal = parseFloat($('hoursTotal').value) || 0;
+  const hoursPct = hoursTotal > 0 ? (hoursPassed/hoursTotal) * 100 : 0;
+
+  const levelCurrent = parseFloat($('levelCurrent').value) || 0;
+  const levelTotal = parseFloat($('levelTotal').value) || 0;
+  const levelPct = levelTotal > 0 ? (levelCurrent/levelTotal) * 100 : 0;
+
+  const w = parseFloat($('weighted').value) || 0;
+
+  const officialComposite = 0.4*gpa100 + 0.4*w + 0.2*hoursPct;
+  const actualComposite = 0.30*gpa100 + 0.70*w;
+
+  const adjustedGpa100 = gpa100;
+
+  const adjustedWeighted = Math.min(100, w);
+
+  const wGpa = parseFloat($('weightGpa').value) || 0;
+  const wWeighted = parseFloat($('weightWeighted').value) || 0;
+  const wHours = parseFloat($('weightHours').value) || 0;
+  const weightSum = wGpa + wWeighted + wHours;
+  $('wGpaDisp').textContent = r1(wGpa);
+  $('wWeightedDisp').textContent = r1(wWeighted);
+  $('wHoursDisp').textContent = r1(wHours);
+  $('weightSumWarning').style.display = Math.abs(weightSum - 100) > 0.01 ? 'block' : 'none';
+
+  const proposedComposite = (wGpa/100)*adjustedGpa100 + (wWeighted/100)*adjustedWeighted + (wHours/100)*hoursPct;
+
+  const TIER_MIN_THRESHOLD = {
+    health: parseFloat($('minHealth').value) || 70,
+    scientific: parseFloat($('minScientific').value) || 65,
+    theoretical: parseFloat($('minTheoretical').value) || 60,
+  };
+  const externalMargin = parseFloat($('externalMargin').value) || 5;
+  $('marginFieldHint').textContent = `الحد يُحدَّد حسب تصنيف الكلية الهدف لكل رغبة على حدة؛ يُضاف ${r1(externalMargin)}٪ تلقائياً عند التحويل الخارجي. قابلة للتعديل هنا للتجربة.`;
+  $('minThresholdLabel').textContent = isExternal ? `الحد الأدنى لدخول المنافسة حسب تصنيف الكلية الهدف (٪ داخلي، يُضاف ${r1(externalMargin)}٪ تلقائياً للخارجي)` : 'الحد الأدنى لدخول المنافسة حسب تصنيف الكلية الهدف (٪ داخلي)';
+  $('externalNoteText').innerHTML = `يشمل أي طالب قد درس في جامعة أو كلية محلية (سعودية، حكومية أو أهلية)، أو جامعة أو كلية أو مؤسسة تعليمية أجنبية مرخّصة من جهة الاختصاص في بلد الدراسة. لا تعتمد المعادلة على أي مقارنة لمعايير القبول بين الجامعة المصدر وجامعة الجوف، ولا تشترط توفر أي بيانات عن تلك الجامعة. القياس يقوم حصراً على بيانات الطالب نفسه (معدله، نسبته الموزونة/المكافئة، وساعاته)، بنفس أوزان التحويل الداخلي تماماً، مع تشديد الحد الأدنى لدخول المنافسة بهامش ثابت (+${r1(externalMargin)} نقاط) فوق حد كل تصنيف كلية، موضَّح أدناه.`;
+  $('compareCardTitle').textContent = `مثال: الفرق بين التحويل الداخلي والخارجي — وأثر هامش الـ+${r1(externalMargin)}`;
+  $('compareCardSub').textContent = `يقارن هذا المثال نفس بيانات الطالب الحالية على الحد الأدنى الموحّد لدخول المنافسة، مرة كأنه تحويل داخلي ومرة كأنه تحويل خارجي، ليتضح أثر هامش الـ+${r1(externalMargin)} وحده.`;
+
+  // show/update the "effective" (+margin% external) hints next to each threshold field
+  const effSpans = { health: 'minHealthEff', scientific: 'minScientificEff', theoretical: 'minTheoreticalEff' };
+  Object.keys(TIER_MIN_THRESHOLD).forEach(tier => {
+    const span = $(effSpans[tier]);
+    if(isExternal){
+      span.style.display = 'block';
+      span.textContent = `+${r1(externalMargin)}٪ للخارجي = ${r1(TIER_MIN_THRESHOLD[tier] + externalMargin)}٪`;
+    } else {
+      span.style.display = 'none';
+    }
+  });
+
+  // --- process preferences sequentially (Sequential Matching) ---
+  const hoursOK = hoursPct <= 50;
+  const levelOK = levelPct <= 50;
+  const durationOK = hoursOK && levelOK;
+  let acceptedIdx = -1;
+  const prefResults = preferences.map((p, i) => {
+    if(acceptedIdx !== -1){
+      return { ...p, status: 'skipped', reason: 'لم تُفحص؛ الطالب قُبل في رغبة أعلى' };
+    }
+    if(!durationOK){
+      return { ...p, status: 'rejected', reason: `تجاوز الطالب نصف مدة برنامجه الحالي (${!hoursOK ? 'بالساعات' : ''}${!hoursOK && !levelOK ? ' و' : ''}${!levelOK ? 'بالمستويات' : ''})` };
+    }
+    const gpaOK = p.gpaMin === '' ? true : gpaOn5 >= parseFloat(p.gpaMin);
+    if(!gpaOK){
+      return { ...p, status: 'rejected', reason: `المعدل ${r1(gpaOn5)}/5 أقل من الحد الأدنى الذي يحدده القسم (${p.gpaMin})` };
+    }
+    const prefThreshold = TIER_MIN_THRESHOLD[p.tier] + (isExternal ? externalMargin : 0);
+    if(proposedComposite < prefThreshold){
+      return { ...p, status: 'rejected', reason: `النسبة المركبة ${r1(proposedComposite)}٪ أقل من الحد الأدنى لكلية ${TIER_LABELS[p.tier]} (${r1(prefThreshold)}٪)` };
+    }
+    if(!p.seat){
+      return { ...p, status: 'rejected', reason: 'تجاوز الحد الأدنى، لكن لا يوجد مقعد شاغر لهذه الرغبة' };
+    }
+    acceptedIdx = i;
+    return { ...p, status: 'accepted', reason: `تجاوز الحد الأدنى (${r1(prefThreshold)}٪) ويوجد مقعد شاغر ← يُقبل هنا وتتوقف المعالجة` };
+  });
+
+  const proposedEligible = acceptedIdx !== -1;
+
+  // update duration info line
+  $('durationInfo').textContent = `نسبة الإنجاز بالساعات: ${r1(hoursPct)}٪ ${hoursOK?'✓':'✗'} · نسبة الإنجاز بالمستويات: ${r1(levelPct)}٪ ${levelOK?'✓':'✗'} — ${durationOK ? 'ضمن الحد المسموح ٥٠٪ في كليهما' : 'تجاوز نصف المدة في أحد المقياسين — غير مسموح بالتحويل'}`;
+
+  // verdict
+  const vb = $('verdictBox');
+  vb.className = 'verdict ' + (proposedEligible ? 'good' : 'bad');
+  if(proposedEligible){
+    const accepted = prefResults[acceptedIdx];
+    $('verdictTitle').textContent = `مؤهَّل ويُقبل في الرغبة ${acceptedIdx+1}${accepted.name ? ' — ' + accepted.name : ''}`;
+    $('verdictSub').textContent = 'وفق آلية المطابقة التتابعية، الطالب مؤهَّل لأعلى رغبة استوفى شروطها ووُجد فيها مقعد شاغر.';
+  } else if(!durationOK){
+    $('verdictTitle').textContent = 'غير مؤهَّل — تجاوز نصف مدة البرنامج';
+    $('verdictSub').textContent = 'يُرفض طلب التحويل بكامل رغباته فوراً، دون فحص أي رغبة على حدة.';
+  } else {
+    $('verdictTitle').textContent = 'غير مؤهَّل في أي من الرغبات المقدَّمة';
+    $('verdictSub').textContent = 'راجع جدول الرغبات أدناه لمعرفة سبب الرفض في كل رغبة على حدة.';
+  }
+
+  // results cards (official vs actual vs proposed composite — same for every preference)
+  let cardsHtml = `
+    <div class="result-card">
+      <div class="result-title-row"><h3>المعلنة رسمياً (٤٠/٤٠/٢٠)</h3></div>
+      <div class="sub">بدون معاملات أو حدود دنيا تصنيفية</div>
+      <div class="num"><span class="v" style="color:#64748B">${r1(officialComposite)}</span><span class="u">٪</span></div>
+    </div>`;
+
+  cardsHtml += `
+    <div class="result-card">
+      <div class="result-title-row"><h3>الفعلية المعمول بها حالياً (٣٠/٧٠)</h3></div>
+      <div class="sub">٣٠٪ معدل تراكمي + ٧٠٪ نسبة موزونة، بلا وزن للساعات</div>
+      <div class="num"><span class="v" style="color:#B7913F">${r1(actualComposite)}</span><span class="u">٪</span></div>
+    </div>`;
+
+  cardsHtml += `
+    <div class="result-card proposed">
+      <div class="result-title-row"><h3>المعادلة المقترحة</h3><span class="pill-proposed">مقترحة</span></div>
+      <div class="sub">${isExternal ? `هامش الحد الأدنى +${r1(externalMargin)}٪ (بيانات الطالب فقط)` : 'بدون أي معامل إنصاف كلية'}</div>
+      <div class="num"><span class="v" style="color:#17414d">${r1(proposedComposite)}</span><span class="u">٪</span></div>
+      <div class="chips">
+        <span class="chip ok">${iconCheck()}ثابتة عبر كل الرغبات</span>
+        <span class="chip ${durationOK?'ok':'no'}">${durationOK?iconCheck():iconX()}الحد الأقصى للمدة</span>
+      </div>
+    </div>`;
+
+  $('resultsGrid').innerHTML = cardsHtml;
+
+  // chart
+  const bars = [
+    {label:'المعلنة رسمياً<br>(٤٠/٤٠/٢٠)', value: officialComposite, color:'#94A3B8'},
+    {label:'الفعلية المطبَّقة<br>(٣٠/٧٠)', value: actualComposite, color:'#B7913F'},
+    {label:'المقترحة', value: proposedComposite, color:'#17414d'},
+  ];
+  let chartHtml = '';
+  bars.forEach(b=>{
+    const h = clamp(b.value,0,100);
+    chartHtml += `<div class="bar-col">
+        <div class="bar" style="height:${h}%; background:${b.color};"><span class="val">${r1(b.value)}٪</span></div>
+        <div class="bar-label">${b.label}</div>
+      </div>`;
+  });
+  $('chart').innerHTML = chartHtml;
+
+  // preferences cascade table
+  let prefTableHtml = `<p style="font-size:12px;color:#43555b;margin:0 0 8px;">النسبة المركبة للطالب: <b>${r1(proposedComposite)}٪</b> (ثابتة عبر كل الرغبات) — الحد الأدنى يختلف حسب تصنيف الكلية الهدف لكل رغبة${isExternal ? ` (شامل هامش +${r1(externalMargin)}٪ للخارجي)` : ''}:</p>
+  <table class="pref-table"><thead><tr>
+      <th>الرغبة</th><th>التخصص الهدف</th><th>تصنيف الكلية</th><th>الحد الأدنى للمعدل بالقسم</th><th>الحد الأدنى للنسبة المركبة</th><th>القرار</th>
+    </tr></thead><tbody>`;
+  prefResults.forEach((p, i) => {
+    const th = TIER_MIN_THRESHOLD[p.tier] + (isExternal ? externalMargin : 0);
+    prefTableHtml += `<tr class="${p.status}">
+        <td>${i+1}</td>
+        <td>${p.name || '—'}</td>
+        <td>${TIER_LABELS[p.tier]}</td>
+        <td>${p.gpaMin!==''?`${p.gpaMin}/5`:'غير محدد'}</td>
+        <td>${r1(th)}٪</td>
+        <td>${p.reason}</td>
+      </tr>`;
+  });
+  prefTableHtml += `</tbody></table>`;
+  $('prefResultsTable').innerHTML = prefTableHtml;
+
+  // ----- Internal vs External impact example (all three tiers, same student) -----
+  const tierRows = [
+    { key: 'health', label: 'صحية' },
+    { key: 'scientific', label: 'علمية' },
+    { key: 'theoretical', label: 'نظرية' },
+  ];
+  const compareRows = tierRows.map(t => {
+    const inTh = TIER_MIN_THRESHOLD[t.key];
+    const outTh = inTh + externalMargin;
+    const inOK = proposedComposite >= inTh;
+    const outOK = proposedComposite >= outTh;
+    return `<tr>
+        <td>${t.label}</td>
+        <td>${r1(inTh)}٪</td>
+        <td>${r1(outTh)}٪ (+${r1(externalMargin)})</td>
+        <td class="${inOK ? 'accepted' : 'rejected'}">${inOK ? `✓ يدخل (${r1(proposedComposite)}٪ ≥ ${r1(inTh)}٪)` : `✗ يُستبعد (${r1(proposedComposite)}٪ < ${r1(inTh)}٪)`}</td>
+        <td class="${outOK ? 'accepted' : 'rejected'}">${outOK ? `✓ يدخل (${r1(proposedComposite)}٪ ≥ ${r1(outTh)}٪)` : `✗ يُستبعد (${r1(proposedComposite)}٪ < ${r1(outTh)}٪)`}</td>
+      </tr>`;
+  }).join('');
+
+  const compareHtml = `
+    <table class="pref-table">
+      <thead><tr><th>تصنيف الكلية الهدف</th><th>الحد الأدنى (داخلي)</th><th>الحد الأدنى (خارجي)</th><th>القرار داخلياً</th><th>القرار خارجياً</th></tr></thead>
+      <tbody>${compareRows}</tbody>
+    </table>
+    <p style="font-size:11.5px;color:#93a2a7;margin-top:10px;">نسبة الطالب المركبة الثابتة (${r1(proposedComposite)}٪) تُقارَن بحد كل تصنيف كلية هدف على حدة، مع هامش ثابت +${r1(externalMargin)}٪ عند التحويل الخارجي. بقية المعادلة (المعدل، الموزونة، الساعات) ثابتة تماماً بين الداخلي والخارجي. يمكنك تعديل الحدود الثلاثة من حقول «الحد الأدنى لدخول المنافسة» أعلاه لتجربة قيم أخرى؛ علماً أن المقترح الرسمي في التقرير يثبّتها عند ٧٠/٦٥/٦٠.</p>`;
+  $('internalExternalCompare').innerHTML = compareHtml;
+
+  // full formula breakdown
+  const officialTerm1 = 0.4*gpa100, officialTerm2 = 0.4*w, officialTerm3 = 0.2*hoursPct;
+  const actualTerm1 = 0.30*gpa100, actualTerm2 = 0.70*w;
+  const proposedTerm1 = (wGpa/100)*adjustedGpa100, proposedTerm2 = (wWeighted/100)*adjustedWeighted, proposedTerm3 = (wHours/100)*hoursPct;
+
+  let formulaHtml = `
+    <div class="formula-section">
+      <div class="formula-title"><span class="dot" style="background:#94A3B8"></span>المعادلة المعلنة رسمياً (٤٠/٤٠/٢٠) — بدون أي معاملات</div>
+      <div class="formula-steps">
+        <div class="fstep"><span class="flabel">مكوّن المعدل التراكمي (٪٤٠)</span><span class="fexpr">0.4 × ${r1(gpa100)}٪ = ${r1(officialTerm1)}</span></div>
+        <div class="fstep"><span class="flabel">مكوّن النسبة الموزونة (٪٤٠)</span><span class="fexpr">0.4 × ${r1(w)}٪ = ${r1(officialTerm2)}</span></div>
+        <div class="fstep"><span class="flabel">مكوّن نسبة الساعات (٪٢٠)</span><span class="fexpr">0.2 × ${r1(hoursPct)}٪ = ${r1(officialTerm3)}</span></div>
+        <div class="fresult"><span>النسبة المركبة المعلنة رسمياً</span><b style="color:#64748B">${r1(officialComposite)}٪</b></div>
+      </div>
+    </div>
+
+    <div class="formula-section">
+      <div class="formula-title"><span class="dot" style="background:#B7913F"></span>النسبة الفعلية المطبَّقة (٣٠/٧٠) — بلا وزن للساعات</div>
+      <div class="formula-steps">
+        <div class="fstep"><span class="flabel">مكوّن المعدل التراكمي (٪٣٠)</span><span class="fexpr">0.30 × ${r1(gpa100)}٪ = ${r1(actualTerm1)}</span></div>
+        <div class="fstep"><span class="flabel">مكوّن النسبة الموزونة (٪٧٠)</span><span class="fexpr">0.70 × ${r1(w)}٪ = ${r1(actualTerm2)}</span></div>
+        <div class="fresult"><span>النسبة الفعلية المطبَّقة</span><b style="color:#B7913F">${r1(actualComposite)}٪</b></div>
+      </div>
+    </div>
+
+    <div class="formula-section">
+      <div class="formula-title"><span class="dot" style="background:#17414d"></span>المعادلة المقترحة — بكامل طبقاتها (ثابتة عبر كل الرغبات)</div>
+      <div class="formula-steps">
+        <div class="fstep"><span class="flabel">١. تحويل المعدل لمقياس ٥</span><span class="fexpr">${gpaScale===5 ? `لا حاجة للتحويل (أصلاً من 5) → ${gpa} / 5` : gpaScale===4 ? `${gpa} × (5/4) = ${r1(gpaOn5)} / 5` : `(${gpa} / 100) × 5 = ${r1(gpaOn5)} / 5`}</span></div>
+        <div class="fstep"><span class="flabel">٢. المعدل كنسبة من ١٠٠</span><span class="fexpr">(${r1(gpaOn5)} / 5) × 100 = ${r1(gpa100)}٪</span></div>
+        <div class="fstep fstep-sum"><span class="flabel">٣. مكوّن المعدل (٪${r1(wGpa)})</span><span class="fexpr">${(wGpa/100).toFixed(2)} × ${r1(adjustedGpa100)}٪ = ${r1(proposedTerm1)}</span></div>
+        <div class="sum-plus">+</div>
+        <div class="fstep fstep-sum"><span class="flabel">٤. مكوّن الموزونة (٪${r1(wWeighted)})</span><span class="fexpr">${(wWeighted/100).toFixed(2)} × ${r1(adjustedWeighted)}٪ = ${r1(proposedTerm2)}</span></div>
+        <div class="sum-plus">+</div>
+        <div class="fstep fstep-sum"><span class="flabel">٥. مكوّن نسبة الساعات (٪${r1(wHours)})</span><span class="fexpr">${(wHours/100).toFixed(2)} × ${r1(hoursPct)}٪ = ${r1(proposedTerm3)}</span></div>
+        <div class="fresult"><span>النسبة المركبة المقترحة</span><b style="color:#17414d">${r1(proposedComposite)}٪</b></div>
+      </div>
+    </div>
+    <p style="font-size:11.5px;color:#93a2a7;margin-top:10px;">هذه النسبة ثابتة لأي رغبة يجتاز فيها الطالب شرط المدة؛ ما يختلف من رغبة لأخرى هو الحد الأدنى المطلوب فقط — راجع جدول «آلية المطابقة التتابعية» أعلاه.</p>`;
+  $('formulaBlock').innerHTML = formulaHtml;
+}
+
+compute();
+</script>
+</body>
+</html>
